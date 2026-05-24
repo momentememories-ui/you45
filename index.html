@@ -149,11 +149,13 @@
 
     <audio id="bg-music" src="song.mp3" loop></audio>
 
+    <!-- ปรับคำพูดเริ่มต้นให้เข้ากับคอนเซปต์ -->
     <h1 id="status-text">เธอช่วยรดน้ำให้ต้นไม้ต้นนี้หน่อยนะ🌱</h1>
 
     <div id="plant-container">
         <img id="main-plant-img" src="stage1.png">
-        <img id="nong-img" src="nong.png"> </div>
+        <img id="nong-img" src="nong.png">
+    </div>
 
     <div id="touch-area"></div>
     <img id="watering-can-img" src="water-can.png">
@@ -189,17 +191,17 @@
 
         let count = 0;
         let isComplete = false;
-        let isBouquetStage = false; // เพิ่มสถานะเช็คว่าเป็นเวอร์ชันช่อดอกไม้หรือยัง
+        let isBouquetStage = false;
         
         // อัปเดตแคปชันรูปภาพ 1-10 พร้อมเติมข้อ 9-10 ให้ซึ้งกินใจเข้ากับธีมต้นไม้ขี้อ้อน
         const captions = [
             "ส่งเธอกลับบ้าน\nคิดถึงมากก", 
-            "วันเกิดเธอปีก่อน\เธอชอบเค้กขนมปัง", 
             "วันวาเลนไทน์\nเธอให้ดอกไม้เค้า\nน่ารักที่สุด", 
+            "วันเกิดเธอปีก่อน\เธอชอบเค้กขนมปัง", 
             "อ้วนๆ", 
             "เราทำต้นคริสต์มาสด้วยกัน", 
-            "ทำบัวลอยด้วยกัน\nอร่อยมาก", 
             "เธอชอบถ่ายรูปท่าแปลกๆ", 
+            "ทำบัวลอยด้วยกัน\nอร่อยมาก", 
             "ของขวัญวันเกิดเค้า\nเธอซื้อให้\nน่ารักที่สุดด", 
             "เที่ยวด้วยกัน", 
             "วันเกิดเธอปีก่อนนู้นน"
@@ -218,7 +220,6 @@
             if (isComplete) return;
             count++;
             
-            // ปรับข้อความตอนรดน้ำให้เข้ากับธีม "มาช่วยกันดูแลต้นไม้ต้นนี้ด้วยกันนะ"
             if (count <= 20) {
                 statusText.innerText = `เย้! ได้น้ำจากเธอแล้วเริ่มโตเลย (${count}%)`;
             } else if (count <= 40) {
@@ -242,10 +243,9 @@
                 waterCan.remove();
                 touchArea.remove();
                 
-                // เมื่อรดน้ำเสร็จ จะแสดงเครื่องหมายคำถาม (?) ออกมาก่อน
                 setTimeout(() => { 
                     nongImg.classList.add('show'); 
-                    statusText.innerText = `ลองกดดูสิ?`; 
+                    statusText.innerText = `มาเก็บเกี่ยวกัน...ลองกดดูสิ?`; 
                 }, 800);
             } else {
                 waterCan.style.display = "block";
@@ -258,27 +258,27 @@
 
         touchArea.addEventListener('pointerup', () => { if(waterCan) waterCan.style.display = "none"; });
 
-        // ปรับแต่ง Logic การกดที่ปุ่ม Nong ใหม่ตามเงื่อนไขที่ต้องการ
         nongImg.onclick = () => {
-            // ถ้ายังไม่เป็นช่อดอกไม้ (กดครั้งแรกที่เครื่องหมาย ?) ให้เปลี่ยนกระถางต้นไม้ตอนโตกลายเป็นช่อดอกไม้
             if (!isBouquetStage) {
-                plantImg.src = 'bouquet.png'; // เปลี่ยนรูปต้นไม้เป็นช่อดอกไม้
-                nongImg.style.display = 'none'; // ซ่อนตัว ? ไปเลย หรือเปลี่ยนสถานะเพื่อให้ทำขั้นตอนต่อไป
+                // เปลี่ยนร่างเป็นช่อดอกไม้ และทำ Transition ขยายใหญ่ขึ้นเล็กน้อย (scale(1.15))
+                plantImg.style.transform = "scale(0.3)"; // เริ่มจากจุดเล็กๆ ก่อนขยายตัว
+                plantImg.src = 'bouquet.png'; 
                 
-                // รอแพร็บนึงให้ช่อดอกไม้แสดงตัวสวยๆ แล้วทำให้ตัวช่อดอกไม้สามารถกดเพื่อระเบิดรูปได้
+                setTimeout(() => {
+                    plantImg.style.transform = "scale(1.15)"; // ขยายขนาดให้เด่นและใหญ่ขึ้นอีกนิด
+                }, 50);
+
+                nongImg.style.display = 'none'; 
+                
                 setTimeout(() => {
                     isBouquetStage = true;
-                    statusText.innerText = `มาเก็บเกี่ยวกัน... \nลองกดที่ช่อดอกไม้สิ!`;
+                    statusText.innerText = `ลองกดที่ช่อดอกไม้สิ!`;
                     
-                    // ปรับโครงสร้างให้คลิกที่ตัวช่อดอกไม้ (plantImg) เพื่อระเบิดผลผลิตออกมา
                     plantImg.style.cursor = 'pointer';
                     plantImg.onclick = () => {
                         bgMusic.play().catch(e => console.log("Music play blocked"));
-                        plantImg.style.transform = "scale(0)";
-                        plantImg.style.opacity = "0";
-                        setTimeout(() => {
-                            explode();
-                        }, 200);
+                        // ลบโค้ดส่วนที่ทำให้ช่อดอกไม้หายไปออก เพื่อให้ภาพช่อดอกไม้ยังคงอยู่เป็นพื้นหลังตรงกลางหน้าจอ
+                        explode();
                     };
                 }, 100);
             }
@@ -288,17 +288,14 @@
             statusText.style.opacity = "0";
             plantContainer.onclick = null;
 
-            // จัดตำแหน่งโครงสร้างกริดล็อกพิกัด 11 จุด (10 รูปภาพ + 1 กล่องจดหมาย) 
-            // กระจายตัวรอบ ๆ จุดกึ่งกลาง ไม่ให้ซ้อนทับกันมิด และแคบพอที่จะไม่ตกขอบจอมือถือ
             const positions = [
-                {x: -110, y: -140}, {x: 0, y: -150}, {x: 110, y: -140},  // แถวบน
-                {x: -120, y: -50},                   {x: 120, y: -50},   // แถวกลางบน
-                {x: -120, y: 40},                    {x: 120, y: 40},    // แถวกลางล่าง
-                {x: -110, y: 130},  {x: 0, y: 150},  {x: 110, y: 130},   // แถวล่าง
-                {x: 0, y: -40}                                           // พิกัดสำหรับกล่องจดหมาย (ลอยอยู่เหนือนิดหน่อย)
+                {x: -110, y: -140}, {x: 0, y: -150}, {x: 110, y: -140},
+                {x: -120, y: -50},                   {x: 120, y: -50}, 
+                {x: -120, y: 40},                    {x: 120, y: 40},  
+                {x: -110, y: 130},  {x: 0, y: 150},  {x: 110, y: 130}, 
+                {x: 0, y: -40}                                         
             ];
 
-            // สับเปลี่ยนตำแหน่งพิกัดแบบสุ่ม (Shuffle) เพื่อให้กดเล่นแต่ละรอบรูปสลับมุมกันอย่างเป็นธรรมชาติ
             for (let i = positions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [positions[i], positions[j]] = [positions[j], positions[i]];
@@ -312,13 +309,12 @@
                 img.onclick = (e) => { e.stopPropagation(); showPhoto(img, img.src, captions[i]); };
                 document.body.appendChild(img);
                 
-                // ดึงพิกัดที่จัดสรรไว้ + ขยับตำแหน่งเยื้องสุ่มเล็กน้อย (Jitter) ให้ดูเอียงสวยงามเป็นธรรมชาติ
                 const pos = positions[i];
                 const jitterX = (Math.random() - 0.5) * 15;
                 const jitterY = (Math.random() - 0.5) * 15;
                 const finalX = pos.x + jitterX;
                 const finalY = pos.y + jitterY;
-                const rotate = (Math.random() - 0.5) * 30; // ลดองศาการหมุนภาพลงเพื่อให้กดง่ายขึ้น
+                const rotate = (Math.random() - 0.5) * 30;
 
                 setTimeout(() => {
                     img.style.left = `calc(50% + ${finalX}px)`;
@@ -328,7 +324,6 @@
                 }, i * 60);
             }
 
-            // จัดตำแหน่งของกล่องจดหมาย (boxBtn) จากพิกัดตัวสุดท้ายในอาร์เรย์ที่เหลืออยู่
             const boxPos = positions[10];
             const boxJitterX = (Math.random() - 0.5) * 10;
             const boxJitterY = (Math.random() - 0.5) * 10;
@@ -344,11 +339,9 @@
             }, 100);
         }
 
-        // ตัวแปรเก็บพิกัดเดิมเพื่อใช้ทำทรานซิชันขากลับ
         let currentOriginElement = null;
         let emojiInterval = null;
 
-        // ฟังก์ชันสร้างละอองอิโมจิลอยขึ้นด้านหลังตอนเปิดรูป/จดหมาย
         function startEmojiBurst() {
             const container = document.getElementById('photo-viewer').style.display === 'flex' ? 
                 document.getElementById('photo-viewer') : document.getElementById('overlay');
@@ -366,7 +359,6 @@
                 setTimeout(() => el.remove(), 2500);
             }
             
-            // ปล่อยระลอกแรกทันที และตั้ง interval สุ่มปล่อยเรื่อย ๆ
             for(let i=0; i<6; i++) setTimeout(spawn, Math.random() * 300);
             emojiInterval = setInterval(spawn, 400);
         }
@@ -383,12 +375,10 @@
             document.getElementById('view-img').src = src;
             document.getElementById('view-caption').innerText = text;
             
-            // หาพิกัดตำแหน่งเริ่มต้นของรูปภาพจิ๋วบนหน้าจอ
             const rect = element.getBoundingClientRect();
             const startLeft = rect.left + (rect.width / 2);
             const startTop = rect.top + (rect.height / 2);
             
-            // ย้ายการทำอนิเมชั่นมาเริ่มจากจุดที่ถูกกด
             card.style.transition = 'none';
             card.style.left = startLeft + 'px';
             card.style.top = startTop + 'px';
@@ -397,7 +387,6 @@
             
             viewer.style.display = 'flex';
             
-            // เปิดทรานซิชันขยายเข้าสู่จุดกึ่งกลางหน้าจอ
             setTimeout(() => {
                 viewer.style.backgroundColor = 'rgba(0,0,0,0.85)';
                 card.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
