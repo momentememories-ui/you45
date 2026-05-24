@@ -149,13 +149,11 @@
 
     <audio id="bg-music" src="song.mp3" loop></audio>
 
-    <!-- ปรับคำพูดเริ่มต้นให้เข้ากับคอนเซปต์ -->
     <h1 id="status-text">เธอช่วยรดน้ำให้ต้นไม้ต้นนี้หน่อยนะ🌱</h1>
 
     <div id="plant-container">
         <img id="main-plant-img" src="stage1.png">
-        <img id="nong-img" src="nong.png">
-    </div>
+        <img id="nong-img" src="nong.png"> </div>
 
     <div id="touch-area"></div>
     <img id="watering-can-img" src="water-can.png">
@@ -191,6 +189,7 @@
 
         let count = 0;
         let isComplete = false;
+        let isBouquetStage = false; // เพิ่มสถานะเช็คว่าเป็นเวอร์ชันช่อดอกไม้หรือยัง
         
         // อัปเดตแคปชันรูปภาพ 1-10 พร้อมเติมข้อ 9-10 ให้ซึ้งกินใจเข้ากับธีมต้นไม้ขี้อ้อน
         const captions = [
@@ -243,11 +242,10 @@
                 waterCan.remove();
                 touchArea.remove();
                 
-                // แก้ไขจุดนี้: เมื่อรดน้ำเสร็จ จะเปลี่ยนรูปเป็นช่อดอกไม้ (bouquet.png) แล้วแสดงออกมา
+                // เมื่อรดน้ำเสร็จ จะแสดงเครื่องหมายคำถาม (?) ออกมาก่อน
                 setTimeout(() => { 
-                    nongImg.src = 'bouquet.png'; // เปลี่ยนภาพจากเครื่องหมายคำถามหรือรูปเดิมเป็นช่อดอกไม้
                     nongImg.classList.add('show'); 
-                    statusText.innerText = `มาเก็บเกี่ยวกัน... \nลองกดดูสิ?`; 
+                    statusText.innerText = `ลองกดดูสิ?`; 
                 }, 800);
             } else {
                 waterCan.style.display = "block";
@@ -260,14 +258,30 @@
 
         touchArea.addEventListener('pointerup', () => { if(waterCan) waterCan.style.display = "none"; });
 
-        // เมื่อกดที่ช่อดอกไม้ รูปภาพและกล่องจดหมายจะระเบิดเด้งออกมาทันทีตามบรีฟ
+        // ปรับแต่ง Logic การกดที่ปุ่ม Nong ใหม่ตามเงื่อนไขที่ต้องการ
         nongImg.onclick = () => {
-            bgMusic.play().catch(e => console.log("Music play blocked"));
-            nongImg.style.transform = "translate(150px, -200px) scale(0)";
-            nongImg.style.opacity = "0";
-            setTimeout(() => {
-                explode();
-            }, 200);
+            // ถ้ายังไม่เป็นช่อดอกไม้ (กดครั้งแรกที่เครื่องหมาย ?) ให้เปลี่ยนกระถางต้นไม้ตอนโตกลายเป็นช่อดอกไม้
+            if (!isBouquetStage) {
+                plantImg.src = 'bouquet.png'; // เปลี่ยนรูปต้นไม้เป็นช่อดอกไม้
+                nongImg.style.display = 'none'; // ซ่อนตัว ? ไปเลย หรือเปลี่ยนสถานะเพื่อให้ทำขั้นตอนต่อไป
+                
+                // รอแพร็บนึงให้ช่อดอกไม้แสดงตัวสวยๆ แล้วทำให้ตัวช่อดอกไม้สามารถกดเพื่อระเบิดรูปได้
+                setTimeout(() => {
+                    isBouquetStage = true;
+                    statusText.innerText = `มาเก็บเกี่ยวกัน... \nลองกดที่ช่อดอกไม้สิ!`;
+                    
+                    // ปรับโครงสร้างให้คลิกที่ตัวช่อดอกไม้ (plantImg) เพื่อระเบิดผลผลิตออกมา
+                    plantImg.style.cursor = 'pointer';
+                    plantImg.onclick = () => {
+                        bgMusic.play().catch(e => console.log("Music play blocked"));
+                        plantImg.style.transform = "scale(0)";
+                        plantImg.style.opacity = "0";
+                        setTimeout(() => {
+                            explode();
+                        }, 200);
+                    };
+                }, 100);
+            }
         };
 
         function explode() {
